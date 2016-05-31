@@ -1,0 +1,2713 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: AURORA API
+  description: ""
+  termsOfService: ''
+  contact:
+    name: Zeyad Abed
+    email: zeyad.abed@accenture.com
+#host: '52.86.2.164:9000'
+host: 'localhost:9000'
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /accommodation/status/socket/connect:
+    get:
+      tags:
+        - Sockets
+      description: Accommodations status update socket
+      operationId: accommodationStatusSocketConnect
+      produces:
+        - json
+      parameters:
+        - name: body
+          in: body
+          description: ""
+          required: true
+          schema:
+            $ref: '#/definitions/StatusSocket'
+      responses:
+        default:
+          description: json
+  '/accommodation/{id}':
+    get:
+      tags:
+        - Accommodations
+      description: Get all accommodation by id
+      operationId: accommodationById
+      produces:
+        - json
+      parameters:
+        - name: id
+          in: path
+          description: accommodation id (example 1-B214)
+          required: true
+          type: string
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/accommodationGetById'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/postResponseNotFound'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /accommodation/search:
+    post:
+      tags:
+        - Accommodations
+      description: >
+        Search for accommodations  !!dont copy //text inside body!!
+        ```
+        {
+           “query”:”something”,                //Optional field
+           "filters" : [
+               {
+                   "field": "statusId",
+                   "terms": ["VI"]
+               }
+           ],
+           "from":0,                          //Optional, default is 0
+           "size":20,                         //Optional, default is 25
+           "sortBy":"id”,                     //Optional, default is sorting by room number"
+           "sortOrder":”asc"                  //Optional, default is Ascending
+        }```
+        ** Match all **
+        ```
+        {
+        }```
+        ** Text Search **
+        Support searching by one or more Strings. Also support sentence search
+        ```
+        {
+           “query”:”shower"
+        }```
+        ```
+        {
+           “query”:”Deluxe shower dolphine"
+        }```
+        ** Filter **
+        Support filtering by one or more fields. Also, supports multiple terms
+        for a single field
+        ```
+        {
+           "filters" : [
+               {
+                   "field": "statusId",
+                   "terms": ["VI"]
+               }
+           ]
+        }```
+        ```
+        {
+           "filters" : [
+               {
+                   "field": "statusId",
+                   "terms": [“VI”, “OD"]
+               }
+           ]
+        }```
+        ```
+        {
+           "filters" : [
+               {
+                   "field": "statusId",
+                   "terms": [“VI”]
+               },
+               {
+                   "field": “categoryCode",
+                   "terms": [“deluxe”]
+               }
+           ]
+        }```
+        ** Search and Filter **
+        ```
+        {
+          “query”:”Deluxe shower dolphine"
+           "filters" : [
+               {
+                   "field": "statusId",
+                   "terms": ["VI"]
+               }
+           ]
+        }```
+      operationId: searchAccommodations
+      produces:
+        - json
+      parameters:
+        - name: body
+          in: body
+          description: "query is optional field, if not specified, it'll match all; from, size, sortBy, filters and sortOrder are also optional. By default, search from 0 to 25, sorted by room id and sorted alphabitically."
+          required: true
+          schema:
+            $ref: '#/definitions/AccommodationSearch'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/accommodationArray'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /accommodation/status/update:
+    post:
+      tags:
+        - Accommodations
+      description: Update accommodation status.
+      operationId: accommodationStatusUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: "startDate(required), endDate, note and owner(all optional) are only used in Out of service (goos, coos) statuses"
+          schema:
+            $ref: '#/definitions/UpdateAccommodationStatus'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+
+  /accommodation/attributes/add:
+    post:
+      tags:
+        - Accommodations
+      description: Update accommodation attributes.
+      operationId: accommodationAttributesAdd
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: ""
+          schema:
+            $ref: '#/definitions/UpdateAttributes'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+
+  /accommodation/berth/add:
+    post:
+      tags:
+        - Accommodations
+      description: Add/update upper berth for cabins
+      operationId: accommodationBerthAdd
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AddUpperBerth'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+
+  /accommodation/category/update:
+    post:
+      tags:
+        - Accommodations
+      description: Update category to the specified cabins
+      operationId: accommodationCategoryUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: ""
+          schema:
+            $ref: '#/definitions/UpdateAccommodationCategory'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+
+  /accommodation/turnDown/update:
+    post:
+      tags:
+        - Accommodations
+      description: Update acomodation turnDown status
+      operationId: accommodationTurnDownUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: "Turn down value is one of the following: Required, Not Required, Complete"
+          schema:
+            $ref: '#/definitions/UpdateAccommodationTurnDown'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+
+  /accommodation/housekeepingStatus/update:
+    post:
+      tags:
+        - Accommodations
+      description: Udate acomodation housekeepingstatus
+      operationId: accommodationHousekeepingStatusUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: value => true/false
+          schema:
+            $ref: '#/definitions/UpdateHousekeepingStatus'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+
+  /accommodation/cabinType/update:
+    post:
+      tags:
+        - Accommodations
+      description: Update accommodation cabin type
+      operationId: accommodationCabinTypeUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: value => "g" for Guest, "c" for Crew, "f" for Fleet
+          schema:
+            $ref: '#/definitions/UpdateAccommodationCabinType'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+            
+  /accommodation/musterStation/update:
+    post:
+      tags:
+        - Accommodations
+      description: Update accommodation muster station
+      operationId: accommodationMusterStationUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: "Value examples: A, C, H, X"
+          schema:
+            $ref: '#/definitions/UpdateAccommodationMusterStation'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+            
+  /accommodation/complianceCheck/update:
+   post:
+     tags:
+       - Accommodations
+     description: Update accommodation compliance check
+     operationId: update compliance check
+     produces:
+       - application/json
+     parameters:
+       - name: body
+         in: body
+         required: true
+         description: "test"
+         schema:
+           $ref: '#/definitions/UpdateAccommodationComplianceCheck'
+     responses:
+       '200':
+         description: ok
+         schema:
+           $ref: '#/definitions/postResponseOk'
+       '400':
+         description: Bad request
+         schema:
+           $ref: '#/definitions/postResponseBad'
+       '500':
+         description: internal server error
+         schema:
+           $ref: '#/definitions/postResponseError'
+            
+  '/accommodation/statuses/all/{type}':
+    get:
+      tags:
+        - Accommodation Statuses
+      description: Get all statuses for accommodation type.
+      operationId: accommodationStatusesAllByType
+      produces:
+        - application/json
+      parameters:
+        - name: type
+          in: path
+          description: ""
+          required: true
+          type: string
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/accommodationAllStatuses'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /accommodation/statuses/add:
+    post:
+      tags:
+        - Accommodation Statuses
+      description: Add new status for accommodation type.
+      operationId: accommodationStatusesAdd
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: ""
+          schema:
+            $ref: '#/definitions/AddNewStatus'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /accommodation/statuses/update:
+    post:
+      tags:
+        - Accommodation Statuses
+      description: Update status description/state.
+      operationId: accommodationStatusesUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: ""
+          schema:
+            $ref: '#/definitions/UpdateStatus'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  '/accommodation/statuses/deactivate/{id}':
+    post:
+      tags:
+        - Accommodation Statuses
+      description: Activate/deactivate status.
+      operationId: accommodationStatusesDeactivateById
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: status id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /accommodation/categories/all:
+    get:
+      tags:
+        - Accommodation categories
+      description: Get all categories.
+      operationId: accommodationCategoriesAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/accommodationAllCategories'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /accommodation/categories/add:
+    post:
+      tags:
+        - Accommodation categories
+      description: Add new category.
+      operationId: accommodationCategoriesAdd
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: ""
+          schema:
+            $ref: '#/definitions/AddNewCategory'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /definition/all:
+    get:
+      tags:
+        - Definitions
+      description: Get all definitions.
+      operationId: allDefinitions
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/getAllDefinitions'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /muster/stations/all:
+    get:
+      tags:
+        - Muster stations
+      description: Get all muster stations.
+      operationId: musterStationsAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/getMusterStationsAll'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /muster/stations/all/report:
+    get:
+      tags:
+        - Muster stations
+      description: Get all muster stations details (id, location, occupancy, capacity, variance)
+      operationId: musterStationsAllDetails
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/getMusterStationsDetails'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+
+  /muster/stations/guests/{id}/{sortBy}/{order}:
+        get:
+          tags:
+            - Muster stations
+          description: Get and sort all guests associated to specified muster station (by id)
+          operationId: musterStationsGuestsByIdSortByOrder
+          produces:
+            - application/json
+          parameters:
+            - name: id
+              in: path
+              description: id = muster station ID (e.g. "D")
+              required: true
+              type: string
+            - name: sortBy
+              in: path
+              description: sortBy = field to be sorted on ("lastname" OR "cabin")
+              required: true
+              type: string
+            - name: order
+              in: path
+              description: order = sorting order ("asc" OR "desc")
+              required: true
+              type: string
+          responses:
+            '200':
+              description: ok
+              schema:
+                $ref: '#/definitions/guestsGetByMusterStationId'
+            '400':
+              description: Bad request
+              schema:
+                $ref: '#/definitions/postResponseBad'
+            '404':
+              description: Not found
+              schema:
+                $ref: '#/definitions/postResponseNotFound'
+            '500':
+              description: internal server error
+              schema:
+                $ref: '#/definitions/postResponseError'
+                
+  /muster/stations/update:
+    post:
+      tags:
+        - Muster stations
+      description: Update muster station capacity.
+      operationId: musterStationCapacityUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: ""
+          schema:
+            $ref: '#/definitions/UpdateMusterStation'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+
+  /firezone/all:
+    get:
+      tags:
+        - Fire zones
+      description: Get fire zones.
+      operationId: fireZoneAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/getFirezoneAll'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /firezone/all/details:
+    get:
+      tags:
+        - Fire zones
+      description: Get fire zones details (id, occupancy, capacity, variance)
+      operationId: firezoneAllDetails
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/getFirezoneDetails'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /firezone&musterstations/all:
+    get:
+      tags:
+        - 'Muster Stations & Fire zones'
+      description: 'Get all Muster Stations & Fire zones.'
+      operationId: firezoneMusterstationsAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/getFirezone&musterstationsAll'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /carnival/organization/all:
+    get:
+      tags:
+        - Organization/Admin
+      description: Get Carnival corp structure
+      operationId: carnivalOrganizationAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/getAllProperties'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /carnival/corp/property/update:
+    post:
+      tags:
+        - Organization/Admin
+      description: send updates
+      operationId: carnivalCorpPropertyUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/AdminUpdateProperty'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /guest/all:
+    get:
+      tags:
+        - Guest Management
+      description: Get all guests
+      operationId: guestAll
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/guestResponseArray'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  '/guest/{id}':
+    get:
+      tags:
+        - Guest Management
+      description: Get guest by id
+      operationId: guestById
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: path
+          description: id
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Ok
+          schema:
+            $ref: '#/definitions/guestResponse'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /guest/search:
+    post:
+      tags:
+        - Guest Management
+      description: Search guest by last name, first name or reservation number
+      operationId: guestSearch
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: 'firstName, lastName, and reservationNum are all optional fields'
+          schema:
+            $ref: '#/definitions/GuestSearch'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/guestResponseArray'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /guest/checkin:
+    post:
+      tags:
+        - Guest Management
+      description: check in a guest
+      operationId: guestCheckin
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: ""
+          schema:
+            $ref: '#/definitions/GuestCheckIn'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /guest/checkout:
+    post:
+      tags:
+        - Guest Management
+      description: check out a guest
+      operationId: guestCheckout
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: ""
+          schema:
+            $ref: '#/definitions/GuestCheckOut'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /guest/update:
+    post:
+      tags:
+        - Guest Management
+      description: update guest data
+      operationId: guestUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/GuestUpdateFields'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+#  /property/management/update:
+#    post:
+#      tags:
+#        - Property Management
+#      description: Update category, status or attributes in a property
+#      operationId: propertyManagementUpdate
+#      produces:
+#        - application/json
+#      parameters:
+#        - name: body
+#          in: body
+#          required: true
+#          description: ""
+#          schema:
+#            $ref: '#/definitions/getPropertyUpdate'
+#      responses:
+#        '200':
+#          description: ok
+#          schema:
+#            $ref: '#/definitions/postResponseOk'
+#        '400':
+#          description: Bad request
+#          schema:
+#            $ref: '#/definitions/postResponseBad'
+#        '500':
+#          description: internal server error
+#          schema:
+#            $ref: '#/definitions/postResponseError'
+  /nightlyAudit/fire:
+    post:
+      tags:
+        - Nightly audit
+      description: Fire a nightly audit
+      operationId: nightlyAuditFire
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: fireNightly
+          schema:
+            $ref: '#/definitions/fireNightlyAudit'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/nightlyAuditOkResponse'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /nightlyAudit/rollback:
+    post:
+      tags:
+        - Nightly audit
+      description: rollback a nightly audit
+      operationId: nightlyAuditRollback
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          description: "typeCode is optional."
+          schema:
+            $ref: '#/definitions/rollbackNightlyAudit'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/nightlyAuditOkResponse'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /housekeeping/cleaningSchedule:
+    get:
+      tags:
+        - Housekeeping
+      description: Get housekeeping cleaning schedule
+      operationId: cleaningSchedule
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/cleaningSchedule'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/postResponseNotFound'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+  /housekeeping/cleaningSchedule/update:
+    post:
+      tags:
+        - Housekeeping
+      description: Update housekeeping cleaning schedule
+      operationId: cleaningScheduleUpdate
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/cleaningScheduleUpdate'
+      responses:
+        '200':
+          description: ok
+          schema:
+            $ref: '#/definitions/postResponseOk'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/postResponseBad'
+        '500':
+          description: internal server error
+          schema:
+            $ref: '#/definitions/postResponseError'
+definitions:
+  StatusSocket:
+    type: object
+    properties:
+      deviceId:
+        type: string
+      type:
+        type: string
+      occupiedBy:
+        type: string
+      accommodationId:
+        type: string
+      statusId:
+        type: string
+      timestamp:
+        type: string
+  AccommodationSearch:
+    type: object
+    properties:
+      type:
+        type: string
+      query:
+        type: string
+      filters:
+        items:
+          type: array
+      from:
+        type: integer
+        format: int32
+      size:
+        type: integer
+        format: int32
+      sortBy:
+        type: string
+      sortOrder:
+        type: string
+  UpdateAccommodationStatus:
+    type: object
+    properties:
+      statusId:
+        type: string
+        example: goos      
+      startDate:
+        type: string
+        example: "2016-05-21"
+      endDate:
+        type: string
+        example: "2016-05-29"
+      note:
+        type: string
+        example: Fire damage
+      owner:
+        type: string
+        example: Clara Smith
+      ids:
+        type: array
+        items:
+          type: string
+        example: [1-B226, 1-D214]
+  UpdateAccommodationTurnDown:
+    type: object
+    properties:
+      value:
+        type: string
+        example: Turndown Complete
+      ids:
+        type: array
+        items:
+          type: string
+        example: [1-B226, 1-D214]
+  UpdateHousekeepingStatus:
+    type: object
+    properties:
+      value:
+        type: string
+        example: Make Up Room
+      ids:
+        type: array
+        items:
+          type: string
+        example: [1-B212]
+  UpdateAccommodationCabinType:
+    type: object
+    properties:
+      ids:
+        type: array
+        items:
+          type: string
+        example: [1-B226, 1-D214]
+      value:
+        type: string
+        example: g
+  UpdateAccommodationComplianceCheck:
+   type: object
+   properties:
+     id:
+       type: string
+       example: 1-B226
+     inspected:
+       type: string
+       example: true
+     manager:
+       type: string
+       example: John Smith
+     date:
+       type: string
+       example: 2016-04-27T17:01:55.32
+  UpdateAccommodationMusterStation:
+    type: object
+    properties:
+      ids:
+        type: array
+        items:
+          type: string
+        example: [1-B226, 1-D214]
+      value:
+        type: string
+        example: H
+  UpdateAttributes:
+    type: object
+    properties:
+      id:
+        type: string
+        example: 1-B226
+      attributes:
+        type: object
+        example: {another : another}
+  AddUpperBerth:
+    type: object
+    properties:
+      upperConfig:
+        type: string
+        example: 2
+      ids:
+        type: array
+        items:
+          type: string
+        example: [1-B226, 1-D214]
+  UpdateAccommodationCategory:
+    type: object
+    properties:
+      categoryCode:
+        type: string
+        example: D4
+      ids:
+        type: array
+        items:
+          type: string
+        example: [1-B226, 1-D214]
+  AddNewStatus:
+    type: object
+    properties:
+      id:
+        type: string
+        example: new status id
+      cabinType:
+        type: string
+        example: c
+      description:
+        type: string
+        example: New status description
+  UpdateStatus:
+    type: object
+    properties:
+      id:
+        type: string
+        example: newStId
+      description:
+        type: string
+        example: New status description
+  AddNewCategory:
+    type: object
+    properties:
+      code:
+        type: string
+        example: category_code
+      deluxe:
+        type: string
+      meta:
+        type: string
+        example: meta
+      sort:
+        type: string
+        example: asc
+      subMeta:
+        type: string
+        example: submeta
+      description:
+        type: string
+        example: some description
+      active:
+        type: boolean
+        example: true
+  GuestSearch:
+    type: object
+    properties:
+      firstName:
+        type: string
+        example: "MARY"
+      lastName:
+        type: string
+        example: "ADAMS"
+      reservationNum:
+        type: string
+        example: ""
+  GuestCheckIn:
+    type: object
+    properties:
+      type:
+        type: string
+        example: "c"
+      id:
+        type: string
+        example: "123"
+      reservationNum:
+        type: string
+        example: "12345"
+  GuestCheckOut:
+    type: object
+    properties:
+      type:
+        type: string
+        example: "c"
+      id:
+        type: string
+        example: "123"
+      reservationNum:
+        type: string
+        example: "12345"
+  GuestUpdateFields:
+    type: object
+    required: ["id"]
+    properties:
+      id:
+        type: string
+        example: "1001"
+        description: Guest ID
+      preferredName:
+        type: string
+        example: "Will"
+      salutation:
+        type: string
+        example: "Mr"
+      preferredContactMethod:
+        type: string
+        example: "email"
+        description: Optional field. Allowed values 'email','phone','mail',''. 'email' is allowed if guest field 'address.address' is set. 'phone' is allowed if guest field 'address.phone' is set. 'email' is allowed if guest field 'address.email' is set. When not allowed value is passed, nothing is updated. Value '' resets the field.
+  UpdateMusterStation:
+    type: object
+    properties:
+      musterStation:
+        type: string
+        example: B
+      capacity:
+        type: string
+        example: "283"
+  AdminUpdateProperty:
+    type: object
+    properties:
+      orgCode:
+        type: string
+        example: CC
+      brandCode:
+        type: array
+        items:
+          type: string
+          example: "PCL"
+      landAndSea:
+        type: array
+        items:
+          type: string
+          example: "S"
+      propertyCode:
+        type: array
+        items:
+          type: string
+          example: "RP"
+      accommodationIds:
+        type: array
+        items:
+          type: string
+          example: "1-D138"
+      type:
+        type: string
+        example: c
+      update:
+        type: object
+        properties:
+            updateType:
+                type: string
+                example: status
+            operation:
+                type: string
+                example: add
+            currentId:
+                type: string
+                example: ""
+            status:
+                type: object
+                properties:
+                    id:
+                        type: string
+                        example: lol
+                    description:
+                        type: string
+                        example: lol description
+                    active:
+                        type: boolean
+                        example: true
+  fireNightlyAudit:
+    type: object
+    properties:
+      type:
+        type: string
+        example: c
+      ranBy:
+        type: string
+        example: admin
+      overrideRun:
+        type: boolean
+        example: true
+  rollbackNightlyAudit:
+    type: object
+    properties:
+      type:
+        type: string
+      ranBy:
+        type: string
+      ids:
+        type: array
+        items:
+          type: string
+          example: 1-D214
+      typeCode:
+        type: string
+        example: g
+      status:
+        type: string
+        example: VI
+  accommodationAllCategories:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            code:
+              type: string
+            deluxe:
+              type: string
+            meta:
+              type: string
+            sort:
+              type: string
+            subMeta:
+              type: string
+            description:
+              type: string
+            active:
+              type: boolean
+  postResponseOk:
+    type: object
+    properties:
+      code:
+        type: integer
+        example: 200
+      message:
+        type: string
+        example: ok
+      propertyType:
+        type: string
+        example: RP
+      time:
+        type: string
+  postResponseBad:
+    type: object
+    properties:
+      code:
+        type: integer
+        example: 400
+      message:
+        type: string
+        example: Bad request
+      propertyType:
+        type: string
+        example: RP
+      time:
+        type: string
+  postResponseError:
+    type: object
+    properties:
+      code:
+        type: integer
+        example: 500
+      message:
+        type: string
+        example: Internal server error
+      propertyType:
+        type: string
+        example: RP
+      time:
+        type: string
+  postResponseNotFound:
+    type: object
+    properties:
+      code:
+        type: integer
+        example: 404
+      message:
+        type: string
+        example: Not found
+      propertyType:
+        type: string
+        example: RP
+      time:
+        type: string
+  accommodationAllStatuses:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            cabinType:
+              type: string
+            description:
+              type: string
+            active:
+              type: boolean
+  accommodationGetById:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: object
+        properties:
+          id:
+            type: string
+          rawKey:
+            type: object
+            properties:
+              shipModel:
+                type: integer
+              roomNumber:
+                type: string
+          roomNumber:
+            type: string
+          startDate:
+            type: string
+          endDate:
+            type: string
+          details:
+            type: object
+            properties:
+              category:
+                type: object
+                properties:
+                  categoryCode:
+                    type: string
+                  categoryDescription:
+                    type: string
+              description:
+                type: string
+              status:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  description:
+                    type: string
+              cabinType:
+                type: string
+              occupiedBy:
+                type: string
+              section:
+                type: string
+              firezone:
+                type: string
+              musterStation:
+                type: string
+              access:
+                type: string
+              bags:
+                type: string
+              balcony:
+                type: string
+              bath:
+                type: string
+              bedConfiguration:
+                type: string
+              bedsConvert:
+                type: string
+              loungeChair:
+                type: string
+              deck:
+                type: object
+                properties:
+                  deckNumber:
+                    type: string
+                  deckName:
+                    type: string
+                  deckPosition:
+                    type: integer
+              electrical:
+                type: string
+              insideOrOutside:
+                type: string
+              key:
+                type: string
+              lift:
+                type: string
+              obstructedUpper:
+                type: string
+              supportsRollAwayOrCrib:
+                type: string
+          berths:
+            type: object
+            properties:
+              total:
+                type: integer
+              lower:
+                type: integer
+          amenities:
+            type: object
+            properties:
+              fridge:
+                type: string
+              safe:
+                type: string
+              tv:
+                type: string
+              tvMusic:
+                type: string
+              telephone:
+                type: string
+              hairDryer:
+                type: string
+          dimensions:
+            type: object
+            properties:
+              cabinSize:
+                type: string
+              doorWidth:
+                type: string
+              balconyDim:
+                type: object
+                properties:
+                  widthFeet:
+                    type: string
+                  widthInches:
+                    type: string
+                  lengthFeet:
+                    type: string
+                  lengthInches:
+                    type: string
+              room:
+                type: object
+                properties:
+                  widthFeet:
+                    type: string
+                  widthInches:
+                    type: string
+                  lengthFeet:
+                    type: string
+                  lengthInches:
+                    type: string
+          postOrStarboard:
+            type: string
+          shipZone:
+            type: string
+          attributes:
+            type: object
+            properties:
+              details:
+                type: object
+                properties:
+                  description:
+                    type: string
+                  category:
+                    type: object
+                    properties:
+                      categoryCode:
+                        type: string
+                      categoryDescription:
+                        type: string
+  accommodationArray:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            rawKey:
+              type: object
+              properties:
+                shipModel:
+                  type: integer
+                roomNumber:
+                  type: string
+            roomNumber:
+              type: string
+            startDate:
+              type: string
+            endDate:
+              type: string
+            details:
+              type: object
+              properties:
+                category:
+                  type: object
+                  properties:
+                    categoryCode:
+                      type: string
+                    categoryDescription:
+                      type: string
+                description:
+                  type: string
+                status:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    description:
+                      type: string
+                cabinType:
+                  type: string
+                occupiedBy:
+                  type: string
+                section:
+                  type: string
+                firezone:
+                  type: string
+                musterStation:
+                  type: string
+                access:
+                  type: string
+                bags:
+                  type: string
+                balcony:
+                  type: string
+                bath:
+                  type: string
+                bedConfiguration:
+                  type: string
+                bedsConvert:
+                  type: string
+                loungeChair:
+                  type: string
+                deck:
+                  type: object
+                  properties:
+                    deckNumber:
+                      type: string
+                    deckName:
+                      type: string
+                    deckPosition:
+                      type: integer
+                electrical:
+                  type: string
+                insideOrOutside:
+                  type: string
+                key:
+                  type: string
+                lift:
+                  type: string
+                obstructedUpper:
+                  type: string
+                supportsRollAwayOrCrib:
+                  type: string
+            berths:
+              type: object
+              properties:
+                total:
+                  type: integer
+                lower:
+                  type: integer
+            amenities:
+              type: object
+              properties:
+                fridge:
+                  type: string
+                safe:
+                  type: string
+                tv:
+                  type: string
+                tvMusic:
+                  type: string
+                telephone:
+                  type: string
+                hairDryer:
+                  type: string
+            dimensions:
+              type: object
+              properties:
+                cabinSize:
+                  type: string
+                doorWidth:
+                  type: string
+                balconyDim:
+                  type: object
+                  properties:
+                    widthFeet:
+                      type: string
+                    widthInches:
+                      type: string
+                    lengthFeet:
+                      type: string
+                    lengthInches:
+                      type: string
+                room:
+                  type: object
+                  properties:
+                    widthFeet:
+                      type: string
+                    widthInches:
+                      type: string
+                    lengthFeet:
+                      type: string
+                    lengthInches:
+                      type: string
+            postOrStarboard:
+              type: string
+            shipZone:
+              type: string
+            attributes:
+              type: object
+              properties:
+                details:
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                    category:
+                      type: object
+                      properties:
+                        categoryCode:
+                          type: string
+                        categoryDescription:
+                          type: string
+  getFirezoneAll:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            rawKey:
+              type: object
+              properties:
+                code:
+                  type: string
+                shipModel:
+                  type: string
+            safetyCapacity:
+              type: object
+              properties:
+                upper:
+                  type: integer
+                total:
+                  type: integer
+            physicalCapacity:
+              type: object
+              properties:
+                lower:
+                  type: integer
+                upper:
+                  type: integer
+                total:
+                  type: integer
+  getFirezoneDetails:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            currentOccupancy:
+              type: integer
+            maxCapacity:
+              type: integer
+            variance:
+              type: integer
+  'getFirezone&musterstationsAll':
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            firezones:
+              type: object
+              properties:
+                id:
+                  type: string
+                rawKey:
+                  type: object
+                  properties:
+                    code:
+                      type: string
+                    shipModel:
+                      type: string
+                safetyCapacity:
+                  type: object
+                  properties:
+                    upper:
+                      type: integer
+                    total:
+                      type: integer
+                physicalCapacity:
+                  type: object
+                  properties:
+                    lower:
+                      type: integer
+                    upper:
+                      type: integer
+                    total:
+                      type: integer
+            musterStations:
+              type: object
+              properties:
+                station:
+                  type: string
+                location:
+                  type: string
+                phoneNumber:
+                  type: string
+                alternativeLocation:
+                  type: string
+                number:
+                  type: string
+                capacity:
+                  type: array
+                  items:
+                    type: string
+                allocatedLifeBoat:
+                  type: array
+                  items:
+                    type: string
+  getAllDefinitions:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            cabinType:
+              type: array
+              items:
+                type: string
+            accomodationType:
+              type: array
+              items:
+                type: string
+            accommodationLocationType:
+              type: array
+              items:
+                type: string
+            organizationName:
+              type: array
+              items:
+                type: string
+            cruiseShipName:
+              type: array
+              items:
+                type: string
+  getMusterStationsAll:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            station:
+              type: string
+            location:
+              type: string
+            phoneNumber:
+              type: string
+            alternativeLocation:
+              type: string
+            number:
+              type: string
+            capacity:
+              type: array
+              items:
+                type: string
+            allocatedLifeBoat:
+              type: array
+              items:
+                type: string
+  getMusterStationsDetails:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            location:
+              type: string
+            totalOccupancy:
+              type: integer
+            maxCapacity:
+              type: integer
+            variance:
+              type: integer
+  guestsGetByMusterStationId:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            title:
+              type: string
+            firstname:
+              type: string
+            lastname:
+              type: string
+            cabin:
+              type: string
+  getAllProperties:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          propertyType:
+            type: string
+            example: RP
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            code:
+              type: string
+            brands:
+              type: object
+              properties:
+                code:
+                  type: string
+                name:
+                  type: string
+                landAndSea:
+                  type: object
+                  properties:
+                    code:
+                      type: string
+                    name:
+                      type: string
+                    properties:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                        name:
+                          type: string
+#  getPropertyUpdate:
+#    type: object
+#    properties:
+#      orgCode:
+#        type: string
+#        example: CC
+#      brandCode:
+#        type: array
+#        items:
+#          type: string
+#          example: "PCL"
+#      landAndSea:
+#        type: array
+#        items:
+#          type: string
+#          example: "S"
+#      propertyCode:
+#        type: array
+#        items:
+#          type: string
+#          example: "RP"
+#      accommodationIds:
+#        type: array
+#        items:
+#          type: string
+#          example: "1-D216"
+#      type:
+#        type: string
+#        example: c
+#      update:
+#        type: object
+#        properties:
+#            updateType:
+#                type: string
+#                example: attributes
+#            operation:
+#                type: string
+#                example: add
+#            currentId:
+#                type: string
+#                example: "VI"
+#            attributes:
+#                type: object
+#                properties:
+#                    sofa:
+#                        type: string
+#                        example: zzzzz
+#                    test:
+#                        type: string
+#                        example: some test                    
+  nightlyAuditOkResponse:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          time:
+            type: string
+      data:
+        type: object
+        properties:
+          ranBy:
+            type: string
+          didRun:
+            type: boolean
+          successful:
+            type: boolean
+          message:
+            type: string
+          updatedRecords:
+            type: array
+            items:
+              type: string
+  guestResponse:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          time:
+            type: string
+      data:
+        type: object
+        properties:
+          id:
+            type: string
+          bookingNumber:
+            type: string
+          originalBookingNumber:
+            type: string
+          ownerBookingNumber:
+            type: string
+          guestPersonalDetails:
+            type: object
+            properties:
+              firstName:
+                type: string
+              lastName:
+                type: string
+              firstInitial:
+                type: string
+              userName:
+                type: string
+              age:
+                type: integer
+              gender:
+                type: string
+              birthDate:
+                type: string
+              title:
+                type: string
+              nationality:
+                type: string
+              preferredLanguage:
+                type: string
+              passportCountryCode:
+                type: string
+          folio:
+            type: object
+            properties:
+              folio:
+                type: string
+              folioBalance:
+                type: string
+              folioNumber:
+                type: integer
+          cabinDetails:
+            type: object
+            properties:
+              cabinNumber:
+                type: string
+              cabinClass:
+                type: string
+              berth:
+                type: string
+              shipCode:
+                type: string
+          embarkation:
+            type: object
+            properties:
+              disembarkDate:
+                type: string
+              disembarkPortCode:
+                type: string
+              embarkDate:
+                type: string
+              embarkPortCode:
+                type: string
+          address:
+            type: object
+            properties:
+              address:
+                type: string
+              apt:
+                type: string
+              city:
+                type: integer
+              country:
+                type: string
+              countryCode:
+                type: string
+              email:
+                type: string
+              phone:
+                type: string
+              state:
+                type: string
+              zip:
+                type: string
+          paymentInfo:
+            type: object
+            properties:
+              creditCardNumber:
+                type: string
+              hotelCharge:
+                type: string
+              loyaltyLevel:
+                type: integer
+              declinedAmount:
+                type: string
+              giftShopChargingBlocked:
+                type: string
+              photoChargingBlocked:
+                type: boolean
+              barChargingBlocked:
+                type: boolean
+              casinoChargingBlocked:
+                type: boolean
+              ccApprovalAmount:
+                type: string
+              salonChargingBlocked:
+                type: boolean
+          paxInfo:
+            type: object
+            properties:
+              originalPaxStatus:
+                type: string
+              paxMigrated:
+                type: boolean
+              paxStatus:
+                type: string
+              settleTransitPaxAtEOCFlag:
+                type: boolean
+          barcode:
+            type: string
+          barcodeDeleted:
+            type: string
+          captainCircleNumber:
+            type: string
+          concessionCode:
+            type: string
+          deleted:
+            type: boolean
+          employee:
+            type: boolean
+          groupId:
+            type: string
+          modifiedBy:
+            type: string
+          pid:
+            type: string
+          stewardSection:
+            type: string
+          twid:
+            type: string
+  guestResponseArray:
+    type: object
+    properties:
+      meta:
+        type: object
+        properties:
+          code:
+            type: integer
+            example: 200
+          message:
+            type: string
+            example: ok
+          time:
+            type: string
+      data:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+            bookingNumber:
+              type: string
+            originalBookingNumber:
+              type: string
+            ownerBookingNumber:
+              type: string
+            guestPersonalDetails:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                firstInitial:
+                  type: string
+                userName:
+                  type: string
+                age:
+                  type: integer
+                gender:
+                  type: string
+                birthDate:
+                  type: string
+                title:
+                  type: string
+                nationality:
+                  type: string
+                preferredLanguage:
+                  type: string
+                passportCountryCode:
+                  type: string
+            folio:
+              type: object
+              properties:
+                folio:
+                  type: string
+                folioBalance:
+                  type: string
+                folioNumber:
+                  type: integer
+            cabinDetails:
+              type: object
+              properties:
+                cabinNumber:
+                  type: string
+                cabinClass:
+                  type: string
+                berth:
+                  type: string
+                shipCode:
+                  type: string
+            embarkation:
+              type: object
+              properties:
+                disembarkDate:
+                  type: string
+                disembarkPortCode:
+                  type: string
+                embarkDate:
+                  type: string
+                embarkPortCode:
+                  type: string
+            address:
+              type: object
+              properties:
+                address:
+                  type: string
+                apt:
+                  type: string
+                city:
+                  type: integer
+                country:
+                  type: string
+                countryCode:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                state:
+                  type: string
+                zip:
+                  type: string
+            paymentInfo:
+              type: object
+              properties:
+                creditCardNumber:
+                  type: string
+                hotelCharge:
+                  type: string
+                loyaltyLevel:
+                  type: integer
+                declinedAmount:
+                  type: string
+                giftShopChargingBlocked:
+                  type: string
+                photoChargingBlocked:
+                  type: boolean
+                barChargingBlocked:
+                  type: boolean
+                casinoChargingBlocked:
+                  type: boolean
+                ccApprovalAmount:
+                  type: string
+                salonChargingBlocked:
+                  type: boolean
+            paxInfo:
+              type: object
+              properties:
+                originalPaxStatus:
+                  type: string
+                paxMigrated:
+                  type: boolean
+                paxStatus:
+                  type: string
+                settleTransitPaxAtEOCFlag:
+                  type: boolean
+            barcode:
+              type: string
+            barcodeDeleted:
+              type: string
+            captainCircleNumber:
+              type: string
+            concessionCode:
+              type: string
+            deleted:
+              type: boolean
+            employee:
+              type: boolean
+            groupId:
+              type: string
+            modifiedBy:
+              type: string
+            pid:
+              type: string
+            stewardSection:
+              type: string
+            twid:
+              type: string
+  cleaningSchedule:
+    type: object
+    required: [type, guest, fleet, officer]
+    properties:
+      type:
+        type: string
+      guest:
+        type: object
+        required: [dailyTurnDown, linenRefreshInterval]
+        properties:
+          dailyTurnDown:
+            type: boolean
+          linenRefreshInterval:
+            type: integer
+      fleet:
+        type: object
+        required: [dailyTurnDown, linenRefreshInterval]
+        properties:
+          dailyTurnDown:
+            type: boolean
+          linenRefreshInterval:
+            type: integer
+      officer:
+        type: object
+        required: [dailyTurnDown, linenRefreshInterval]
+        properties:
+          dailyTurnDown:
+            type: boolean
+          linenRefreshInterval:
+            type: integer
+  cleaningScheduleUpdate:
+    type: object
+    properties:
+      guest:
+        type: object
+        required: [dailyTurnDown, linenRefreshInterval]
+        properties:
+          dailyTurnDown:
+            type: boolean
+          linenRefreshInterval:
+            type: integer
+      fleet:
+        type: object
+        required: [dailyTurnDown, linenRefreshInterval]
+        properties:
+          dailyTurnDown:
+            type: boolean
+          linenRefreshInterval:
+            type: integer
+      officer:
+        type: object
+        required: [dailyTurnDown, linenRefreshInterval]
+        properties:
+          dailyTurnDown:
+            type: boolean
+          linenRefreshInterval:
+            type: integer
